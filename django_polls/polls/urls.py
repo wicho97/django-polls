@@ -11,13 +11,13 @@ urlpatterns = [
     ),
     # ex: /polls/5/
     path(
-        route="<int:question_id>/",
+        route="<int:pk>/",
         view=views.DetailView.as_view(),
         name="detail"
     ),
     # ex: /polls/5/results/
     path(
-        route="<int:question_id>/results/",
+        route="<int:pk>/results/",
         view=views.ResultsView.as_view(),
         name="results"
     ),
