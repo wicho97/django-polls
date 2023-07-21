@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from .models import Question
+from .models import Question, Choice
 
 # Create your tests here.
 
@@ -49,6 +49,9 @@ def create_question(question_text, days):
     """
     time = timezone.now() + datetime.timedelta(days=days)
     return Question.objects.create(question_text=question_text, pub_date=time)
+
+def create_choice(question, choice_text):
+    return Choice.objects.create(question=question, choice_text=choice_text)
 
 
 class QuestionIndexViewTests(TestCase):
@@ -134,3 +137,48 @@ class QuestionDetailViewTests(TestCase):
         url = reverse("polls:detail", args=(past_question.id,))
         response = self.client.get(url)
         self.assertContains(response, past_question.question_text)
+
+
+class VotesTests(TestCase):
+    def test_question_not_exits_should_return_404(self):
+        url = reverse('polls:vote', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_question_if_exits_should_return_200(self):
+        question = create_question(
+            question_text="Question", days=0)
+        
+        url = reverse('polls:vote', args=(question.id,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        
+    def test_vote(self):
+        """Dado una pregunta con 3 opciones la opcion, el numero de votos elejida por el usuario debe ser 1"""
+        question = create_question(question_text="Question?", days=0)
+        create_choice(question, choice_text='Choice 1')
+        selected_choice = create_choice(question, choice_text='Choice 2')
+        create_choice(question, choice_text='Choice 3')
+        
+        url = reverse('polls:vote', args=(question.id,))
+        response = self.client.post(url, {"choice": selected_choice.id}, follow=True)
+   
+        # selected_choice = question.choice_set.get(pk=2)
+        # usamos refresh_from_db() para sincronizar el objeto con la db dado que no se actualiza automaticamente porque la vista es la que actualiza los votos
+        selected_choice.refresh_from_db()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(selected_choice.votes, 1)
+
+    def test_redirect(self):
+        question = create_question(question_text="Question", days=0)
+        selected_choice = create_choice(question, choice_text='Choice 2')
+
+        url = reverse('polls:vote', args=(question.id,))
+        response = self.client.post(url, {"choice": selected_choice.id})
+
+        url_results = reverse('polls:results', args=(question.id,))
+        self.assertRedirects(response, url_results)
+
+
+
