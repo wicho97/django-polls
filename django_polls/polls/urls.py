@@ -27,4 +27,22 @@ urlpatterns = [
         view=views.vote,
         name="vote"
     ),
+    # ex: /polls/create/
+    path(
+        "create/",
+        view=views.create_question,
+        name="create_question"
+    ),
+    # ex: /polls/1/update/
+    path(
+        "<int:question_id>/update/",
+        view=views.update_question,
+        name="update_question"
+    ),
+    # ex: /polls/1/delete/
+    path(
+        "<int:question_id>/delete/",
+        view=views.delete_question,
+        name="delete_question"
+    ),
 ]

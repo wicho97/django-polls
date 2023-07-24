@@ -3,12 +3,16 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
+from django.contrib import messages
+
 from .models import Question, Choice
+
+from .forms import QuestionForm
 
 # Create your views here.
 
 
-DEFAULT_LIMIT = 5
+DEFAULT_LIMIT = 10
 
 
 class IndexView(generic.ListView):
@@ -60,3 +64,43 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
+
+
+def create_question(request):
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            form = QuestionForm()
+            context = {'form': form}
+            messages.success(request, 'Pregunta registrada!')
+            return render(request, 'polls/create.html', context)
+    else:
+        form = QuestionForm()
+    context = {'form': form}
+    return render(request, 'polls/create.html', context)
+
+
+def update_question(request, question_id):
+    question = Question.objects.get(id=question_id)
+    if request.method == 'POST':
+        form = QuestionForm(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            form = QuestionForm()
+            context = {'form': form}
+            messages.success(request, 'Pregunta actualizada!')
+            return render(request, 'polls/update.html', context)
+    else:
+        form = QuestionForm(instance=question)
+    context = {'form': form}
+    return render(request, 'polls/update.html', context)
+
+
+def delete_question(request, question_id):
+    question = Question.objects.get(id=question_id)
+    question.delete()
+    questions = Question.objects.all()
+    context = {'questions': questions}
+    messages.success(request, 'Pregunta eliminada!')
+    return render(request, 'polls/index.html', context)
