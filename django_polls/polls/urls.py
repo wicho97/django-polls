@@ -45,4 +45,9 @@ urlpatterns = [
         view=views.delete_question,
         name="delete_question"
     ),
+    path(
+        "login/",
+        view=views.LoginView.as_view(),
+        name="login"
+    ),
 ]

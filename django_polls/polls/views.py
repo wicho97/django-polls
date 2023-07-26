@@ -4,6 +4,8 @@ from django.urls import reverse
 from django.views import generic
 from django.utils import timezone
 from django.contrib import messages
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Question, Choice
 
@@ -12,10 +14,7 @@ from .forms import QuestionForm
 # Create your views here.
 
 
-DEFAULT_LIMIT = 10
-
-
-class IndexView(generic.ListView):
+class IndexView(LoginRequiredMixin, generic.ListView):
     template_name = "polls/index.html"
     context_object_name = "latest_question_list"
     paginate_by = 5
@@ -25,15 +24,13 @@ class IndexView(generic.ListView):
         Return the last five published questions (not including those set to be
         published in the future).
         """
-        if 'search' in self.request.GET:
-            query = self.request.GET['search']
-            data = Question.objects.filter(question_text__icontains=query).order_by("-pub_date")[:10]
-        else:
-            data = Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")[:10]
-        return data
+        query = self.request.GET.get('search', '')
+        if query:
+            return Question.objects.filter(question_text__icontains=query).order_by("-pub_date")
+        return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")
 
 
-class DetailView(generic.DetailView):
+class DetailView(LoginRequiredMixin, generic.DetailView):
     model = Question
     template_name = "polls/detail.html"
 
@@ -103,6 +100,7 @@ def update_question(request, question_id):
     return render(request, 'polls/update.html', context)
 
 
+
 def delete_question(request, question_id):
     question = Question.objects.get(id=question_id)
     question.delete()
@@ -110,3 +108,12 @@ def delete_question(request, question_id):
     context = {'questions': questions}
     messages.success(request, 'Pregunta eliminada!')
     return render(request, 'polls/index.html', context)
+
+
+class LoginView(auth_views.LoginView):
+    template_name = 'polls/login.html'
+
+
+class LogoutView(LoginRequiredMixin, auth_views.LoginView):
+    template_name = 'polls/logout.html'
+    
