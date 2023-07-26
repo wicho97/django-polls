@@ -41,7 +41,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         return Question.objects.filter(pub_date__lte=timezone.now())
 
 
-class ResultsView(generic.DetailView):
+class ResultsView(LoginRequiredMixin, generic.DetailView):
     model = Question
     template_name = "polls/results.html"
 
@@ -100,7 +100,6 @@ def update_question(request, question_id):
     return render(request, 'polls/update.html', context)
 
 
-
 def delete_question(request, question_id):
     question = Question.objects.get(id=question_id)
     question.delete()
@@ -116,4 +115,3 @@ class LoginView(auth_views.LoginView):
 
 class LogoutView(LoginRequiredMixin, auth_views.LoginView):
     template_name = 'polls/logout.html'
-    
