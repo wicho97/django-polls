@@ -1,57 +1,62 @@
-{% extends "polls/base.html" %} {% block title %} Home {% endblock %}
+{% extends "polls/base.html" %} {% block title %} Inicio {% endblock %}
 {% block content %}
 
-<div class="container">
-  <a
-    class="btn btn-primary"
-    href="{% url 'polls:create_question' %}"
-    role="button"
-    >Crear Pregunta</a
-  >
-  {% if request.GET.search %}
-  <h1>Search: {{ request.GET.search }}</h1>
-  {% endif %}
-
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th scope="col">Pregunta</th>
-        <th scope="col">Pub date</th>
-        <th scope="col">Acciones</th>
-      </tr>
-    </thead>
-    {% if latest_question_list %}
-    <tbody>
-      {% for question in latest_question_list %}
-      <tr>
-        <td>
-          <a href="{% url 'polls:detail' question.id %}">
-            {{ question.question_text }}
-          </a>
-        </td>
-        <td>{{ question.pub_date }}</td>
-        <td>
-          <a
-            href="{% url 'polls:update_question' question.id %}"
-            type="button"
-            class="btn btn-outline-primary"
-            >Actualizar</a
-          >
-          <a
-            href="{% url 'polls:delete_question' question.id %}"
-            type="button"
-            class="btn btn-outline-danger"
-            >Eliminar</a
-          >
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-    {% else %}
-    <p>No polls are available.</p>
+<section class="mt-5">
+  <div class="container">
+    {% if user.is_authenticated %}
+    <h1 class="text-center mb-3">Hola, {{ user.username }}.</h1>
+    {% endif %}
+    <a
+      class="btn btn-primary mb-2"
+      href="{% url 'polls:create_question' %}"
+      role="button"
+      >Crear Pregunta</a
+    >
+    {% if request.GET.search %}
+    <h2 class="mb-2">Busqueda: {{ request.GET.search }}</h2>
     {% endif %}
-  </table>
-  {% include 'polls/pagination.html' %}
-</div>
+  
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Pregunta</th>
+          <th scope="col">Fecha de publicacion</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      {% if latest_question_list %}
+      <tbody>
+        {% for question in latest_question_list %}
+        <tr>
+          <td>
+            <a href="{% url 'polls:detail' question.id %}">
+              {{ question.question_text }}
+            </a>
+          </td>
+          <td>{{ question.pub_date }}</td>
+          <td>
+            <a
+              href="{% url 'polls:update_question' question.id %}"
+              type="button"
+              class="btn btn-outline-primary"
+              >Actualizar</a
+            >
+            <a
+              href="{% url 'polls:delete_question' question.id %}"
+              type="button"
+              class="btn btn-outline-danger"
+              >Eliminar</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% else %}
+      <p>No hay encuestas disponibles.</p>
+      {% endif %}
+    </table>
+    {% include 'polls/pagination.html' %}
+  </div>
+</section>
 
 {% endblock %}

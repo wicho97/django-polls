@@ -3,22 +3,24 @@
 
 {% block content %}
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-12">
-      <h1 class="mb-3">Actualizar pregunta</h1>
+<section class="mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1 class="mb-3">Actualizar pregunta</h1>
+      </div>
     </div>
+    <form method="post">
+      {% csrf_token %}
+      {{ form }}
+      <button type="submit" class="btn btn-primary mt-2">Actualizar</button>
+    </form>
+    {% if messages %}
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+    {% endif %}
   </div>
-  <form method="post">
-    {% csrf_token %}
-    {{ form }}
-    <button type="submit" class="btn btn-primary">Actualizar</button>
-  </form>
-  {% if messages %}
-  {% for message in messages %}
-  <p>{{ message }}</p>
-  {% endfor %}
-  {% endif %}
-</div>
+</section>
 
 {% endblock %}

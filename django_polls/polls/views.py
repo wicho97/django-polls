@@ -113,5 +113,5 @@ class LoginView(auth_views.LoginView):
     template_name = 'polls/login.html'
 
 
-class LogoutView(LoginRequiredMixin, auth_views.LoginView):
-    template_name = 'polls/logout.html'
+class LogoutView(auth_views.LogoutView):
+    template_name = 'polls/logged_out.html'
