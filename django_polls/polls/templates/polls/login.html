@@ -30,7 +30,11 @@
       </div>
       <button type="submit" class="btn btn-primary mt-2">Login</button>
     </form>
-    <p>Olvidaste tu contrasena?</p>
+    <p>
+      <a href="{% url "polls:password_reset" %}">
+        Olvidaste tu contrasena?
+      </a>
+    </p>
   </div>
 </section>
 

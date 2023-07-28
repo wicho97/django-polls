@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import generic
 from django.utils import timezone
 from django.contrib import messages
@@ -115,3 +115,21 @@ class LoginView(auth_views.LoginView):
 
 class LogoutView(auth_views.LogoutView):
     template_name = 'polls/logged_out.html'
+
+
+class PasswordResetView(auth_views.PasswordResetView):
+    template_name = 'polls/password_reset_form.html'
+    email_template_name = 'polls/password_reset_email.html'
+    success_url = reverse_lazy('polls:password_reset_done')
+
+
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = 'polls/password_reset_done.html'
+
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = 'polls/password_reset_confirm.html'
+
+
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    template_name = 'polls/password_reset_complete.html'
