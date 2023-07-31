@@ -14,7 +14,7 @@ from .forms import QuestionForm
 # Create your views here.
 
 
-class IndexView(LoginRequiredMixin, generic.ListView):
+class IndexView(generic.ListView):
     template_name = "polls/index.html"
     context_object_name = "latest_question_list"
     paginate_by = 5
@@ -30,7 +30,7 @@ class IndexView(LoginRequiredMixin, generic.ListView):
         return Question.objects.filter(pub_date__lte=timezone.now()).order_by("-pub_date")
 
 
-class DetailView(LoginRequiredMixin, generic.DetailView):
+class DetailView(generic.DetailView):
     model = Question
     template_name = "polls/detail.html"
 
@@ -41,7 +41,7 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
         return Question.objects.filter(pub_date__lte=timezone.now())
 
 
-class ResultsView(LoginRequiredMixin, generic.DetailView):
+class ResultsView(generic.DetailView):
     model = Question
     template_name = "polls/results.html"
 
@@ -107,29 +107,3 @@ def delete_question(request, question_id):
     context = {'questions': questions}
     messages.success(request, 'Pregunta eliminada!')
     return render(request, 'polls/index.html', context)
-
-
-class LoginView(auth_views.LoginView):
-    template_name = 'polls/login.html'
-
-
-class LogoutView(auth_views.LogoutView):
-    template_name = 'polls/logged_out.html'
-
-
-class PasswordResetView(auth_views.PasswordResetView):
-    template_name = 'polls/password_reset_form.html'
-    email_template_name = 'polls/password_reset_email.html'
-    success_url = reverse_lazy('polls:password_reset_done')
-
-
-class PasswordResetDoneView(auth_views.PasswordResetDoneView):
-    template_name = 'polls/password_reset_done.html'
-
-
-class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
-    template_name = 'polls/password_reset_confirm.html'
-
-
-class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
-    template_name = 'polls/password_reset_complete.html'

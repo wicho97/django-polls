@@ -45,35 +45,4 @@ urlpatterns = [
         view=views.delete_question,
         name="delete_question"
     ),
-    path(
-        "login/",
-        view=views.LoginView.as_view(),
-        name="login"
-    ),
-    path(
-        "logout/",
-        view=views.LogoutView.as_view(),
-        name="logout"
-    ),
-    # reset password urls
-    path(
-        "password-reset/",
-        view=views.PasswordResetView.as_view(),
-        name="password_reset"
-    ),
-    path(
-        "password-reset/done/",
-        view=views.PasswordResetDoneView.as_view(),
-        name="password_reset_done"
-    ),
-    path(
-        "password-reset/<uidb64>/<token>/",
-        view=views.PasswordResetConfirmView.as_view(),
-        name="password_reset_confirm"
-    ),
-    path(
-        "password-reset/complete/",
-        view=views.PasswordResetCompleteView.as_view(),
-        name="password_reset_complete"
-    ),
 ]

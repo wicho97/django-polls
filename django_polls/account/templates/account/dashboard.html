@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+  <h1>Dashboard</h1>
+  <p>Welcome to your dashboard.</p>
+  <a href="{% url 'polls:index' %}">Ver listado de preguntas</a>
+{% endblock %}
