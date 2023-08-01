@@ -3,6 +3,8 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
+from django.contrib.auth.models import User
+from django.conf import settings
 
 from .models import Question, Choice
 
@@ -49,6 +51,7 @@ def create_question(question_text, days):
     """
     time = timezone.now() + datetime.timedelta(days=days)
     return Question.objects.create(question_text=question_text, pub_date=time)
+
 
 def create_choice(question, choice_text):
     return Choice.objects.create(question=question, choice_text=choice_text)
@@ -148,22 +151,23 @@ class VotesTests(TestCase):
     def test_question_if_exits_should_return_200(self):
         question = create_question(
             question_text="Question", days=0)
-        
+
         url = reverse('polls:vote', args=(question.id,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
-        
+
     def test_vote(self):
         """Dado una pregunta con 3 opciones la opcion, el numero de votos elejida por el usuario debe ser 1"""
         question = create_question(question_text="Question?", days=0)
         create_choice(question, choice_text='Choice 1')
         selected_choice = create_choice(question, choice_text='Choice 2')
         create_choice(question, choice_text='Choice 3')
-        
+
         url = reverse('polls:vote', args=(question.id,))
-        response = self.client.post(url, {"choice": selected_choice.id}, follow=True)
-   
+        response = self.client.post(
+            url, {"choice": selected_choice.id}, follow=True)
+
         # selected_choice = question.choice_set.get(pk=2)
         # usamos refresh_from_db() para sincronizar el objeto con la db dado que no se actualiza automaticamente porque la vista es la que actualiza los votos
         selected_choice.refresh_from_db()
@@ -181,4 +185,31 @@ class VotesTests(TestCase):
         self.assertRedirects(response, url_results)
 
 
+class AuthenticationTests(TestCase):
 
+    def test_only_authenticated_user_should_able_to_edit_a_questions(self):
+        User.objects.create_user(
+            username="test", email="test@test.com", password="test")
+        question = create_question(question_text="Question", days=0)
+
+        # User login
+        self.client.login(username="test", password="test")
+
+        # User visit edit question
+        url = reverse('polls:update_question', args=(question.id,))
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+
+
+class NonAuthenticationTests(TestCase):
+
+    def test_non_authenticated_user_should_not_able_to_edit_a_questions(self):
+        question = create_question(question_text="Question", days=0)
+
+        # User visit edit question
+        url = reverse('polls:update_question', args=(question.id,))
+        response = self.client.get(url, follow=True)
+
+        self.assertRedirects(
+            response, f"/account/login/?next=/polls/{ question.id }/update/")

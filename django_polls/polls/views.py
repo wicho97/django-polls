@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 from .models import Question, Choice
 
@@ -68,7 +69,7 @@ def vote(request, question_id):
         # user hits the Back button.
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
 
-
+@login_required
 def create_question(request):
     if request.method == 'POST':
         form = QuestionForm(request.POST)
@@ -83,7 +84,7 @@ def create_question(request):
     context = {'form': form}
     return render(request, 'polls/create.html', context)
 
-
+@login_required
 def update_question(request, question_id):
     question = Question.objects.get(id=question_id)
     if request.method == 'POST':
@@ -99,7 +100,7 @@ def update_question(request, question_id):
     context = {'form': form}
     return render(request, 'polls/update.html', context)
 
-
+@login_required
 def delete_question(request, question_id):
     question = Question.objects.get(id=question_id)
     question.delete()
