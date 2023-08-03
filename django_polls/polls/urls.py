@@ -11,7 +11,7 @@ urlpatterns = [
     ),
     # ex: /polls/5/
     path(
-        route="<int:pk>/",
+        route="polls/<int:pk>/",
         view=views.DetailView.as_view(),
         name="detail"
     ),
@@ -44,5 +44,23 @@ urlpatterns = [
         "<int:question_id>/delete/",
         view=views.delete_question,
         name="delete_question"
+    ),
+    # ex: polls/1/choice/create/
+    path(
+        "polls/<int:question_id>/choice/create/",
+        view=views.create_choice,
+        name="create_choice"
+    ),
+    # ex: polls/1/choice/1/update/
+    path(
+        "polls/<int:question_id>/choice/<int:choice_id>/update/",
+        view=views.update_choice,
+        name="update_choice"
+    ),
+    # ex: polls/1/choice/1/delete/
+    path(
+        "polls/<int:question_id>/choice/<int:choice_id>/delete/",
+        view=views.delete_choice,
+        name="delete_choice"
     ),
 ]

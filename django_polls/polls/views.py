@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Question, Choice
 
-from .forms import QuestionForm
+from .forms import QuestionForm, ChoiceForm
 
 # Create your views here.
 
@@ -41,6 +41,11 @@ class DetailView(generic.DetailView):
         """
         return Question.objects.filter(pub_date__lte=timezone.now())
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = ChoiceForm()
+        return context
+
 
 class ResultsView(generic.DetailView):
     model = Question
@@ -69,6 +74,7 @@ def vote(request, question_id):
         # user hits the Back button.
         return HttpResponseRedirect(reverse("polls:results", args=(question.id,)))
 
+
 @login_required
 def create_question(request):
     if request.method == 'POST':
@@ -83,6 +89,7 @@ def create_question(request):
         form = QuestionForm()
     context = {'form': form}
     return render(request, 'polls/create.html', context)
+
 
 @login_required
 def update_question(request, question_id):
@@ -100,6 +107,7 @@ def update_question(request, question_id):
     context = {'form': form}
     return render(request, 'polls/update.html', context)
 
+
 @login_required
 def delete_question(request, question_id):
     question = Question.objects.get(id=question_id)
@@ -108,3 +116,37 @@ def delete_question(request, question_id):
     context = {'questions': questions}
     messages.success(request, 'Pregunta eliminada!')
     return render(request, 'polls/index.html', context)
+
+
+@login_required
+def create_choice(request, question_id):
+    if request.method == 'POST':
+        form = ChoiceForm(request.POST)
+        if form.is_valid():
+            question = Question.objects.get(id=question_id)
+            form.instance.question = question
+            form.save(commit=True)
+            messages.success(request, 'Opcion registrada!')
+            return HttpResponseRedirect(reverse("polls:detail", args=(question_id,)))
+    else:
+        messages.error(request, 'Error de validacion!')
+    return HttpResponseRedirect(reverse("polls:detail", args=(question_id,)))
+
+
+@login_required
+def update_choice(request, question_id, choice_id):
+    if request.method == 'POST':
+        choice = Choice.objects.get(id=choice_id)
+        choice.choice_text = request.POST.get('choice_text', '')
+        choice.save()
+    else:
+        messages.error(request, 'Error de validacion!')
+    return HttpResponseRedirect(reverse("polls:detail", args=(question_id,)))
+
+
+@login_required
+def delete_choice(request, question_id, choice_id):
+    choice = Choice.objects.get(id=choice_id)
+    choice.delete()
+    messages.success(request, 'Opcion eliminada!')
+    return HttpResponseRedirect(reverse("polls:detail", args=(question_id,)))

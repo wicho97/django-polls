@@ -3,6 +3,44 @@
 
 <section class="mt-5">
   <div class="container">
+    <a class="btn btn-primary mb-2" href="{% url 'polls:index' %}">Volver al listado</a>
+    {% if request.user.is_authenticated %}
+    <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#exampleModal">
+      Crear una opcion
+    </button>
+    {% endif %}
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">Opciones</th>
+          <th scope="col">Votos</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for choice in question.choice_set.all %}
+        <tr>
+          <td>
+              {{ choice.choice_text }}
+          </td>
+          <td>
+            {{ choice.votes }}
+        </td>
+          <td>
+            <button type="button" class="btn btn-outline-primary mb-2" data-bs-toggle="modal" data-bs-target="#updateModal-{{ forloop.counter }}">
+              Actualizar
+            </button>
+            <a
+              href="{% url 'polls:delete_choice' question.id choice.id %}"
+              type="button"
+              class="btn btn-outline-danger"
+              >Eliminar</a
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     <form action="{% url 'polls:vote' question.id %}" method="post">
       {% csrf_token %}
       <fieldset>
@@ -28,5 +66,48 @@
     </form>
   </div>
 </section>
+
+{% if request.user.is_authenticated %}
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Crear opcion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="/polls/{{ question.id }}/choice/create/">
+          {% csrf_token %}
+          {{ form }}
+          <button type="submit" class="btn btn-primary">Crear</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% for choice in question.choice_set.all %}
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateModalLabel">Actualizar opcion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="/polls/{{ question.id }}/choice/{{ choice.id }}/update/">
+          {% csrf_token %}
+          <input type="hidden" name="choice_id" value="{{ choice.id }}">
+          <input type="text" name="choice_text" maxlength="200" class="form-control" autocomplete="off" required="" id="id_choice_text" value="{{ choice.choice_text }}">
+          <button type="submit" class="btn btn-primary">Actualizar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% endif %}
 
 {% endblock %}
