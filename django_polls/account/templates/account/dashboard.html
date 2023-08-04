@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-  <h1>Dashboard</h1>
-  <p>Welcome to your dashboard.</p>
-  <a href="{% url 'polls:index' %}">Ver listado de preguntas</a>
+<section class="mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <h1>Dashboard</h1>
+        <p>Welcome to your dashboard.</p>
+        <a class="btn btn-primary" href="{% url 'polls:index' %}">Ver listado de preguntas</a>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}
