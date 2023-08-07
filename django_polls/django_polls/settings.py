@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     # Local apps
     'polls.apps.PollsConfig',
     'account.apps.AccountConfig',
+
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -137,3 +139,11 @@ LOGOUT_URL = '/account/logout'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}

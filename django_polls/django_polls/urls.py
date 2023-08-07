@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('polls.urls'), name='polls'),
     path('account/', include('account.urls'), name='account'),
+    path('api/v1/', include('polls.api.urls', namespace='apiv1')),
 ]
