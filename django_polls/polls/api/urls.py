@@ -3,10 +3,26 @@ from . import views
 
 app_name = 'polls'
 urlpatterns = [
-    path('question/',
-         views.QuestionListView.as_view(),
-         name='subject_list'),
-    path('question/<pk>/',
-         views.QuestionDetailView.as_view(),
-         name='subject_detail'),
+    # questions
+    path(
+        route='questions/',
+        view=views.QuestionListCreateView.as_view(),
+        name='question_list'
+    ),
+    path(
+        route='questions/<int:pk>/',
+        view=views.QuestionRetrieveUpdateDestroyView.as_view(),
+        name='question_detail'
+    ),
+    # choices
+    path(
+        route='questions/<int:pk>/choices/',
+        view=views.ChoiceListCreateView.as_view(),
+        name='choice_list'
+    ),
+    path(
+        route='questions/<int:pk>/choices/<int:choice_id>/',
+        view=views.ChoiceRetrieveUpdateDestroyView.as_view(),
+        name='choice_detail'
+    ),
 ]
