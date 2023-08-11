@@ -9,28 +9,28 @@ from polls.api.serializers import QuestionSerializer, ChoiceSerializer
 
 
 class CustomResultsSetPagination(PageNumberPagination):
-    page_size = 5
+    page_size = 20
     page_size_query_param = 'page_size'
     # Max results per page
     max_page_size = 1000
 
 
 class QuestionListCreateView(generics.ListCreateAPIView):
-    queryset = Question.objects.all()
+    queryset = Question.objects.all().order_by('-id')
     serializer_class = QuestionSerializer
     pagination_class = CustomResultsSetPagination
 
-    @permission_classes([IsAuthenticated])
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+    # @permission_classes([IsAuthenticated])
+    # def post(self, request, *args, **kwargs):
+    #     return super().post(request, *args, **kwargs)
 
 
 class QuestionRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
 
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [BasicAuthentication]
+    # permission_classes = [IsAuthenticated]
 
 
 class ChoiceListCreateView(generics.ListCreateAPIView):
