@@ -9,7 +9,7 @@ const EDIT = 2;
 const ALERT_TYPE_SUCCESS = 'success';
 
 const ShowProducts = () => {
-    const urlEndPoint = '';
+    let urlEndPoint = '';
     const url='http://127.0.0.1:8000/api/v1/questions/';
     const [questions,setQuestions]= useState([]);
     const [id,setId]= useState('');
@@ -68,14 +68,14 @@ const ShowProducts = () => {
                     question_text: question_text.trim(),
                     pub_date: pub_date
                 };
-                http_method = 'PUT';
+                http_method = 'PATCH';
             }
 
             makeRequest(http_method, payload);
         }
     }
     const makeRequest = async(http_method, payload) => {
-        if (http_method == 'DELETE'){
+        if (http_method == 'DELETE' || http_method == 'PATCH'){
             urlEndPoint = `${url}${payload.id}/`;
         } else {
             urlEndPoint = url;
@@ -84,6 +84,9 @@ const ShowProducts = () => {
         await axios({ method: http_method, url: urlEndPoint, data: payload }).then(function(response){
             var alertType = response.data[0];
             var message = response.data[1];
+            console.log(response.data);
+            console.log(alertType);
+            console.log(message);
             show_alert(message, alertType);
             if(alertType === ALERT_TYPE_SUCCESS){
                 document.getElementById('btnCerrar').click();

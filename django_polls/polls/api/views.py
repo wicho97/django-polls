@@ -1,8 +1,9 @@
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from polls.models import Question, Choice
 from polls.api.serializers import QuestionSerializer, ChoiceSerializer
@@ -20,17 +21,10 @@ class QuestionListCreateView(generics.ListCreateAPIView):
     serializer_class = QuestionSerializer
     pagination_class = CustomResultsSetPagination
 
-    # @permission_classes([IsAuthenticated])
-    # def post(self, request, *args, **kwargs):
-    #     return super().post(request, *args, **kwargs)
-
 
 class QuestionRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-
-    # authentication_classes = [BasicAuthentication]
-    # permission_classes = [IsAuthenticated]
 
 
 class ChoiceListCreateView(generics.ListCreateAPIView):

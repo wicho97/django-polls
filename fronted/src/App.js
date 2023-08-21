@@ -1,14 +1,32 @@
-import { Routes, Route, BrowserRouter} from 'react-router-dom';
-import ShowProducts from './components/ShowProducts';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+
+import { AuthProvider } from './context/AuthContext'
+
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import Header from './components/Header'
+import ShowProducts from './components/ShowProducts'
+
+import PrivateRoute from './utils/PrivateRoute'
+
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<ShowProducts></ShowProducts>}></Route>
-      </Routes>
-    </BrowserRouter>
-  )
+    return (
+        <div className="App">
+            <Router>
+                <AuthProvider>
+                <Header/>
+                <Routes>
+                    <Route path="/" element={
+                        <PrivateRoute>
+                            <HomePage/>
+                        </PrivateRoute>}/>
+                    <Route path="/login" element={<LoginPage/>}/>
+                </Routes>
+                </AuthProvider>
+            </Router>
+        </div>
+    );
 }
 
 export default App;
