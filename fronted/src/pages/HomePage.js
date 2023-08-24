@@ -191,9 +191,9 @@ const HomePage = () => {
                                                     Editar
                                                 </Button>
                                                 &nbsp; 
-                                                <button onClick={()=>deleteQuestion(question.id,question.question_text)} className='btn btn-danger'>
-                                                    <i className='fa-solid fa-trash'></i>
-                                                </button>
+                                                <Button type="primary" onClick={()=>deleteQuestion(question.id,question.question_text)}>
+                                                    Borrar
+                                                </Button>
                                             </td>
                                         </tr>
                                     ))

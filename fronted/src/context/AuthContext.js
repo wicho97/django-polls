@@ -81,16 +81,16 @@ export const AuthProvider = ({children}) => {
 
     useEffect(()=>{
         const REFRESH_INTERVAL = 1000 * 60 * 4 // 4 minutes
-        // console.log('Llamando useEffect')
+        console.log('Llamando useEffect')
         let interval = setInterval(()=>{
             if(authTokens){
-                // console.log('Actualizando token');
+                console.log('Actualizando token');
                 updateToken()
             }
         }, REFRESH_INTERVAL)
         // Fase de limpieza
         return () => {
-            // console.log("Fase de limpieza")
+            console.log("Fase de limpieza")
             clearInterval(interval)
         }
 
