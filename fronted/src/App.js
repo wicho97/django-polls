@@ -5,7 +5,6 @@ import { AuthProvider } from './context/AuthContext'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import Header from './components/Header'
-import ShowProducts from './components/ShowProducts'
 
 import PrivateRoute from './utils/PrivateRoute'
 

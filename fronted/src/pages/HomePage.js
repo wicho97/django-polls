@@ -3,6 +3,8 @@ import AuthContext from '../context/AuthContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Input, DatePicker, Button, Modal } from 'antd';
+import dayjs from 'dayjs';
 
 const CREATE = 1;
 const EDIT = 2;
@@ -36,26 +38,6 @@ const HomePage = () => {
         if(response.status === 200){
             setQuestions(response.data.results)
         }
-    }
-
-    const openModal = (user_action,id, question_text, pub_date) =>{
-        setId('');
-        setQuestionText('');
-        setPubDate('');
-        setOperation(user_action);
-        if(user_action === CREATE){
-            setModalTitle('Registrar Pregunta');
-        }
-        else if(user_action === EDIT){
-            setModalTitle('Editar Pregunta');
-            setId(id);
-            setQuestionText(question_text);
-            setPubDate(pub_date);
-        }
-
-        window.setTimeout(function(){
-            document.getElementById('question').focus();
-        }, 500);
     }
 
     const validar = () => {
@@ -141,15 +123,53 @@ const HomePage = () => {
         });
     }
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const showModal = (user_action,id, question_text, pub_date) => {
+        setIsModalOpen(true);
+
+        setId('');
+        setQuestionText('');
+        setPubDate(dayjs());
+        setOperation(user_action);
+        if(user_action === CREATE){
+            setModalTitle('Registrar Pregunta');
+        }
+        else if(user_action === EDIT){
+            setModalTitle('Editar Pregunta');
+            setId(id);
+            setQuestionText(question_text);
+            setPubDate(pub_date);
+        }
+    };
+
+    const handleOk = () => {
+        // setIsModalOpen(false);
+        validar();
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
+    const setCustomPubDate = (pub_date) => {
+        console.log(pub_date);
+        if (pub_date == null) {
+            setPubDate(dayjs());
+        } else {
+            setPubDate(pub_date);
+        }
+    }
+
     return (
         <div className='App'>
             <div className='container-fluid'>
                 <div className='row mt-3'>
                     <div className='col-md-4 offset-md-4'>
                         <div className='d-grid mx-auto'>
-                            <button onClick={()=> openModal(CREATE)} className='btn btn-dark' data-bs-toggle='modal' data-bs-target='#modalProducts'>
-                                <i className='fa-solid fa-circle-plus'></i> Añadir
-                            </button>
+                            <Button type="primary" onClick={()=>showModal(CREATE)}>
+                                Añadir
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -167,9 +187,9 @@ const HomePage = () => {
                                             <td>{question.question_text}</td>
                                             <td>{question.pub_date}</td>
                                             <td>
-                                                <button onClick={() => openModal(EDIT,question.id,question.question_text,question.pub_date)} className='btn btn-warning' data-bs-toggle='modal' data-bs-target='#modalProducts'>
-                                                    <i className='fa-solid fa-edit'></i>
-                                                </button>
+                                                <Button type="primary" onClick={()=>showModal(EDIT,question.id,question.question_text,question.pub_date)}>
+                                                    Editar
+                                                </Button>
                                                 &nbsp; 
                                                 <button onClick={()=>deleteQuestion(question.id,question.question_text)} className='btn btn-danger'>
                                                     <i className='fa-solid fa-trash'></i>
@@ -184,35 +204,28 @@ const HomePage = () => {
                     </div>
                 </div>
             </div>
-            <div id='modalProducts' className='modal fade' aria-hidden='true'>
-                <div className='modal-dialog'>
-                    <div className='modal-content'>
-                        <div className='modal-header'>
-                            <label className='h5'>{modal_title}</label>
-                            <button type='button' className='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
-                        </div>
-                        <div className='modal-body'>
-                            <input type='hidden' id='id'></input>
-                            <div className='input-group mb-3'>
-                                <span className='input-group-text'><i className='fa-solid fa-gift'></i></span>
-                                <input type='text' id='question' className='form-control' placeholder='Pregunta' value={question_text} onChange={(e)=> setQuestionText(e.target.value)}></input>
-                            </div>
-                            <div className='input-group mb-3'>
-                                <span className='input-group-text'><i className='fa-solid fa-comment'></i></span>
-                                <input type='datetime-local' id='pub_date' className='form-control' placeholder='Fecha de publicación' value={pub_date} onChange={(e)=> setPubDate(e.target.value)}></input>
-                            </div>
-                            <div className='d-grid col-6 mx-auto'>
-                                <button onClick={() => validar()} className='btn btn-success'>
-                                    <i className='fa-solid fa-floppy-disk'></i> Guardar
-                                </button>
-                            </div>
-                        </div>
-                        <div className='modal-footer'>
-                            <button type='button' id='btnCerrar' className='btn btn-secondary' data-bs-dismiss='modal'>Cerrar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <Modal
+                title={modal_title}
+                open={isModalOpen}
+                onOk={handleOk}
+                onCancel={handleCancel}
+                footer={[
+                    <Button key="back" onClick={handleCancel}>
+                      Cancelar
+                    </Button>,
+                    <Button key="submit" type="primary" onClick={handleOk}>
+                      Guardar
+                    </Button>,
+                  ]}>
+                <Input
+                    placeholder="Escriba una pregunta"
+                    value={ question_text }
+                    onChange={(e)=> setQuestionText(e.target.value)} />
+                <DatePicker
+                    showTime
+                    value={ dayjs(pub_date) }
+                    onChange={date => setCustomPubDate(date)} />
+            </Modal>
         </div>
     )
 }
