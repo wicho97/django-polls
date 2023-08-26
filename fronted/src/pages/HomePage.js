@@ -3,7 +3,7 @@ import AuthContext from '../context/AuthContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import { Input, DatePicker, Button, Modal } from 'antd';
+import { Input, DatePicker, Button, Modal, Space, Table } from 'antd';
 import dayjs from 'dayjs';
 
 const CREATE = 1;
@@ -161,6 +161,51 @@ const HomePage = () => {
         }
     }
 
+    const dataSource = [
+        questions.map( (question,i)=>(
+            {
+                key: i + 1,
+                pk: question.id,
+                question_text: question.question_text,
+                pub_date: question.pub_date,
+            }
+        ))
+      ];
+      
+      const columns = [
+        {
+          title: 'ID',
+          dataIndex: 'pk',
+          key: 'pk',
+        },
+        {
+          title: 'Pregunta',
+          dataIndex: 'question_text',
+          key: 'question_text',
+        },
+        {
+          title: 'Fecha de publicacion',
+          dataIndex: 'pub_date',
+          key: 'pub_date',
+        },
+        {
+            title: 'Acciones',
+            dataIndex: 'acciones',
+            key: 'acciones',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button type="primary" onClick={()=>showModal(EDIT, record.pk, record.question_text, record.pub_date)}>
+                        Editar
+                    </Button>
+                    &nbsp; 
+                    <Button type="primary" onClick={()=>deleteQuestion(record.pk, record.question_text, record.pub_date)}>
+                        Borrar
+                    </Button>
+                </Space>
+              ),
+          },
+      ];
+
     return (
         <div className='App'>
             <div className='container-fluid'>
@@ -176,30 +221,7 @@ const HomePage = () => {
                 <div className='row mt-3'>
                     <div className='col-12 col-lg-8 offset-0 offset-lg-2'>
                         <div className='table-responsive'>
-                            <table className='table table-bordered'>
-                                <thead>
-                                    <tr><th>#</th><th>PREGUNTA</th><th>PUBLICACION</th></tr>
-                                </thead>
-                                <tbody className='table-group-divider'>
-                                    {questions.map( (question,i)=>(
-                                        <tr key={question.id}>
-                                            <td>{(i+1)}</td>
-                                            <td>{question.question_text}</td>
-                                            <td>{question.pub_date}</td>
-                                            <td>
-                                                <Button type="primary" onClick={()=>showModal(EDIT,question.id,question.question_text,question.pub_date)}>
-                                                    Editar
-                                                </Button>
-                                                &nbsp; 
-                                                <Button type="primary" onClick={()=>deleteQuestion(question.id,question.question_text)}>
-                                                    Borrar
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                    }
-                                </tbody>
-                            </table>
+                            <Table dataSource={dataSource[0]} columns={columns} />;
                         </div>
                     </div>
                 </div>
