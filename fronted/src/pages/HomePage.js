@@ -19,6 +19,7 @@ const HomePage = () => {
     const [pub_date,setPubDate]= useState('');
     const [operation,setOperation]= useState(CREATE);
     const [modal_title,setModalTitle]= useState('');
+    let [total_questions, setTotalQuestions] = useState(1);
 
     const CONFIG = {
         headers:{
@@ -30,13 +31,15 @@ const HomePage = () => {
     const END_POINT = "http://127.0.0.1:8000/api/v1/questions/";
 
     useEffect(() => {
-        getQuestions()
+        getQuestions(1,10);
     },[])
 
-    const getQuestions = async() => {
-        let response = await axios.get(END_POINT, CONFIG)
+    const getQuestions = async(page, page_size) => {
+        let response = await axios.get(`${END_POINT}?page=${page}&page_size=${page_size}`, CONFIG)
+        // console.log(`${END_POINT}?page=${page}&page_size=${page_size}`)
         if(response.status === 200){
             setQuestions(response.data.results)
+            setTotalQuestions(response.data.count)
         }
     }
 
@@ -170,9 +173,9 @@ const HomePage = () => {
                 pub_date: question.pub_date,
             }
         ))
-      ];
+    ];
       
-      const columns = [
+    const columns = [
         {
           title: 'ID',
           dataIndex: 'pk',
@@ -204,7 +207,7 @@ const HomePage = () => {
                 </Space>
               ),
           },
-      ];
+    ];
 
     return (
         <div className='App'>
@@ -221,7 +224,15 @@ const HomePage = () => {
                 <div className='row mt-3'>
                     <div className='col-12 col-lg-8 offset-0 offset-lg-2'>
                         <div className='table-responsive'>
-                            <Table dataSource={dataSource[0]} columns={columns} />;
+                            <Table
+                                dataSource={dataSource[0]}
+                                columns={columns}
+                                pagination={{
+                                    total: total_questions,
+                                    onChange: (page, page_size) => {
+                                        getQuestions(page, page_size)
+                                    },
+                                }} />
                         </div>
                     </div>
                 </div>
