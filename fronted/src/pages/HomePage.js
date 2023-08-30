@@ -94,11 +94,16 @@ const HomePage = () => {
             // console.log(alertType);
             // console.log(message);
             // show_alert(message, alertType);
-            // if(alertType === ALERT_TYPE_SUCCESS){
-            //     document.getElementById('btnCerrar').click();
-            //     getQuestions();
-            // }
-            getQuestions();
+            if (http_method == 'DELETE') {
+                Swal.fire(
+                    'Deleted!',
+                    'Your file has been deleted.',
+                    'success'
+                )
+                getQuestions();
+            } else {
+                getQuestions();
+            }
         })
         .catch(function(error){
             // show_alert('Error en la solicitud','error');
@@ -109,20 +114,21 @@ const HomePage = () => {
     const deleteQuestion= (id, question_text) =>{
         const MySwal = withReactContent(Swal);
         MySwal.fire({
-            title:`¿Seguro de eliminar la pregunta ${question_text}?`,
-            icon: 'question',
-            text: 'No se podrá dar marcha atrás',
+            title: `¿Seguro de eliminar la pregunta ${question_text}?`,
+            text: "No se podrá dar marcha atrás",
+            icon: 'warning',
             showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
             confirmButtonText: 'Si, eliminar',
             cancelButtonText:'Cancelar'
-        }).then((result) =>{
-            if(result.isConfirmed){
+        }).then((result) => {
+            if (result.isConfirmed) {
                 setId(id);
                 makeRequest('DELETE',{id: id});
+            } else {
+                Swal.fire('La pregunta no fue eliminada', '', 'info')
             }
-            // else{
-            //     show_alert('La pregunta NO fue eliminado','info');
-            // }
         });
     }
 
