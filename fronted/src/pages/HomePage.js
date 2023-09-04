@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import AuthContext from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
@@ -100,9 +100,9 @@ const HomePage = () => {
                     'Your file has been deleted.',
                     'success'
                 )
-                getQuestions();
+                getQuestions(1,10);
             } else {
-                getQuestions();
+                getQuestions(1,10);
             }
         })
         .catch(function(error){

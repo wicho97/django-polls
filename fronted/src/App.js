@@ -1,6 +1,8 @@
+import React, { useContext } from 'react'
+
 import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom'
 
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider }  from './context/AuthContext'
 
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -15,24 +17,29 @@ const { Header, Content, Footer } = Layout;
 
 function App() {
 
-    let { user, logoutUser } = useContext(AuthContext)
+    // console.log(useContext(AuthContext))
+    // let { user } = useContext(AuthContext);
+    // console.log(user)
+    // console.log(logoutUser)
 
     const {
         token: { colorBgContainer },
     } = theme.useToken();
 
-    const navigation = [
-        { label: "Inicio", key: "/" },
-        { label: "Login", key: "/login" },
-    ];
+    // const navigation = [
+    //     { label: "Inicio", key: "/" },
+    //     { label: "Login", key: "/login" },
+    //     // { label: "Logout", key: "/logout" },
+    // ];
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
-    const handleMenuClick = ({ key }) => {
-        if (key) {
-          navigate(key);
-        }
-    };
+    // const handleMenuClick = (data) => {
+    //     if (data.key) {
+    //         navigate(data.key)
+    //     }
+    //     console.log('click', data.key)
+    // }
 
     return (
         <AuthProvider>
@@ -40,16 +47,10 @@ function App() {
                 <Layout className="layout">
                     <Header style={{ 
                         alignItems: 'center' }}>
-                            <Menu
-                                theme="dark"
-                                mode="horizontal"
-                                items={navigation}
-                                onClick={handleMenuClick}
-                            />
+                            <CustomHeader/>
                     </Header>
                     <Content style={{ padding: '0 50px' }}>
                         <div style={{ margin: '32px 0', padding: 24, minHeight: 380, background: colorBgContainer }}> 
-                                {/* <CustomHeader/> */}
                                 <Routes>
                                     <Route path="/" element={
                                         <PrivateRoute>
