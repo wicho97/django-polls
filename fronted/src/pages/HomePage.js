@@ -13,13 +13,14 @@ const EDIT = 2;
 const HomePage = () => {
     let urlEndPoint = '';
     const { authTokens } = useContext(AuthContext);
-    let [questions, setQuestions] = useState([])
+    let [questions, setQuestions] = useState([]);
     const [id,setId]= useState('');
     const [question_text,setQuestionText]= useState('');
     const [pub_date,setPubDate]= useState('');
     const [operation,setOperation]= useState(CREATE);
     const [modal_title,setModalTitle]= useState('');
     let [total_questions, setTotalQuestions] = useState(1);
+    let [question, setQuestion] = useState([]);
 
     const CONFIG = {
         headers:{
@@ -111,6 +112,13 @@ const HomePage = () => {
         });
     }
 
+    const getQuestion = async(question_id) => {
+        let response = await axios.get(`${END_POINT}${question_id}/`, CONFIG)
+        // console.log(`${END_POINT}?page=${page}&page_size=${page_size}`)
+        setQuestion(response.data)
+        return response.data
+    }
+
     const deleteQuestion= (id, question_text) =>{
         const MySwal = withReactContent(Swal);
         MySwal.fire({
@@ -133,6 +141,7 @@ const HomePage = () => {
     }
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalChoiceOpen, setIsModalChoiceOpen] = useState(false);
 
     const showModal = (user_action,id, question_text, pub_date) => {
         setIsModalOpen(true);
@@ -152,13 +161,27 @@ const HomePage = () => {
         }
     };
 
+    const showModalChoices =  async(question_id) => {
+        setIsModalChoiceOpen(true);
+        console.log('Antes de getQuestion');
+        setQuestion(await getQuestion(question_id));
+        console.log('Despues de getQuestion');
+    };
+
     const handleOk = () => {
-        // setIsModalOpen(false);
         validar();
     };
 
     const handleCancel = () => {
         setIsModalOpen(false);
+    };
+
+    const handleChoiceOk = () => {
+        setIsModalChoiceOpen(false);
+    };
+
+    const handleChoiceCancel = () => {
+        setIsModalChoiceOpen(false);
     };
 
     const setCustomPubDate = (pub_date) => {
@@ -206,9 +229,13 @@ const HomePage = () => {
                     <Button type="primary" onClick={()=>showModal(EDIT, record.pk, record.question_text, record.pub_date)}>
                         Editar
                     </Button>
-                    &nbsp; 
+                    &nbsp;
                     <Button type="primary" onClick={()=>deleteQuestion(record.pk, record.question_text, record.pub_date)}>
                         Borrar
+                    </Button>
+                    &nbsp;
+                    <Button type="primary" onClick={()=>showModalChoices(record.pk, record.choice_text)}>
+                        Votar    
                     </Button>
                 </Space>
               ),
@@ -250,10 +277,10 @@ const HomePage = () => {
                 onCancel={handleCancel}
                 footer={[
                     <Button key="back" onClick={handleCancel}>
-                      Cancelar
+                        Cancelar
                     </Button>,
                     <Button key="submit" type="primary" onClick={handleOk}>
-                      Guardar
+                        Guardar
                     </Button>,
                   ]}>
                 <Input
@@ -264,6 +291,25 @@ const HomePage = () => {
                     showTime
                     value={ dayjs(pub_date) }
                     onChange={date => setCustomPubDate(date)} />
+            </Modal>
+            <Modal
+                title='Opciones'
+                open={isModalChoiceOpen}
+                onOk={handleChoiceOk}
+                onCancel={handleChoiceCancel}
+                footer={[
+                    <Button key="back" onClick={handleChoiceCancel}>
+                        Cancelar
+                    </Button>,
+                    <Button key="submit" type="primary" onClick={handleChoiceOk}>
+                        Votar
+                    </Button>,
+                ]}>
+                    { question && question.choices &&
+                        question.choices.map( (choice)=>(
+                            <p>{ choice.id } - { choice.choice_text }</p>
+                        ))
+                    }
             </Modal>
         </div>
     )

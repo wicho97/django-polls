@@ -56,12 +56,15 @@ export const AuthProvider = ({children}) => {
         const data = await response.json()
         if (response.status === 200) {
             if (localStorage.getItem('authTokens')) {
-                var newAuthTokens = JSON.parse(localStorage.getItem('authTokens'))
-                newAuthTokens.access = data.access
+                // Estamos actualizando el access token y el refresh token se mantiene igual
+                let newAuthTokens = JSON.parse(localStorage.getItem('authTokens'));
+                newAuthTokens.access = data.access;
+                console.log('newAuthTokens: ', newAuthTokens.access);
+
+                setAuthTokens(newAuthTokens);
+                setUser(jwtDecode(data.access));
+                localStorage.setItem('authTokens',JSON.stringify(newAuthTokens));
             }
-            setAuthTokens(newAuthTokens)
-            setUser(jwtDecode(data.access))
-            localStorage.setItem('authTokens',JSON.stringify(newAuthTokens))
         } else {
             logoutUser()
         }
