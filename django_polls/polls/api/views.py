@@ -38,7 +38,8 @@ class ChoiceListCreateView(generics.ListCreateAPIView):
 
 class ChoiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChoiceSerializer
+    lookup_field = 'id'
 
     def get_queryset(self):
-        choice_id = self.kwargs['choice_id']
+        choice_id = self.kwargs['id']
         return Choice.objects.filter(id=choice_id)

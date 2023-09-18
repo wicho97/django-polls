@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
-import { Input, DatePicker, Button, Modal, Space, Table } from 'antd';
+import { Input, DatePicker, Button, Modal, Space, Table, Form } from 'antd';
 import dayjs from 'dayjs';
 
 const CREATE = 1;
@@ -19,6 +19,10 @@ const HomePage = () => {
     const [pub_date,setPubDate]= useState('');
     const [operation,setOperation]= useState(CREATE);
     const [modal_title,setModalTitle]= useState('');
+    const [sub_modal_title,setSubModalTitle]= useState('');
+    const [choice_id,setChoiceId] = useState('');
+    const [choice_text,setChoiceText]= useState('');
+
     let [total_questions, setTotalQuestions] = useState(1);
     let [question, setQuestion] = useState([]);
 
@@ -74,6 +78,43 @@ const HomePage = () => {
         }
     }
 
+    const validarChoice = (question) => {
+        console.log(question);
+        var payload;
+        var http_method;
+        
+        if (choice_text.trim() === ''){
+            console.log('Escribe el nombre de la opción','warning');
+        }
+        else {
+            if (operation === CREATE){
+                payload = {
+                    question: question.pk,
+                    choice_text: choice_text.trim(),
+                };
+                http_method = 'POST';
+            }
+            else {
+                payload = {
+                    choice_id: choice_id,
+                    choice_text: choice_text.trim(),
+                };
+                http_method = 'PATCH';
+            }
+
+            makeRequestChoices(http_method,question.pk, payload);
+        }
+    }
+
+    const setCustomPubDate = (pub_date) => {
+        console.log(pub_date);
+        if (pub_date == null) {
+            setPubDate(dayjs());
+        } else {
+            setPubDate(pub_date);
+        }
+    }
+
     const makeRequest = async(http_method, payload) => {
         if (http_method == 'DELETE' || http_method == 'PATCH'){
             urlEndPoint = `${END_POINT}${payload.id}/`;
@@ -89,12 +130,6 @@ const HomePage = () => {
                 'Authorization':'Bearer ' + String(authTokens.access)
             }
         }).then(function(response){
-            // var alertType = response.data[0];
-            // var message = response.data[1];
-            // console.log(response.data);
-            // console.log(alertType);
-            // console.log(message);
-            // show_alert(message, alertType);
             if (http_method == 'DELETE') {
                 Swal.fire(
                     'Deleted!',
@@ -112,10 +147,44 @@ const HomePage = () => {
         });
     }
 
+    const makeRequestChoices = async(http_method, id, payload) => {
+        console.log(payload);
+        if (http_method == 'DELETE' || http_method == 'PATCH'){
+            urlEndPoint = `${END_POINT}${id}/choices/${payload.choice_id}/`;
+        } else {
+            urlEndPoint = `${END_POINT}${id}/choices/`;
+        }
+        await axios({
+            method: http_method,
+            url: urlEndPoint,
+            data: payload,
+            headers:{
+                'Content-Type': 'application/json',
+                'Authorization':'Bearer ' + String(authTokens.access)
+            }
+        }).then(async function(response){
+            if (http_method == 'DELETE') {
+                Swal.fire(
+                    'Deleted!',
+                    'Your file has been deleted.',
+                    'success'
+                )
+                question = await getQuestion(id)
+                setQuestion(question)
+            } else {
+                question =  await getQuestion(id)
+                setQuestion(question)
+            }
+        })
+        .catch(function(error){
+            // show_alert('Error en la solicitud','error');
+            console.log(error);
+        });
+    }
+
     const getQuestion = async(question_id) => {
         let response = await axios.get(`${END_POINT}${question_id}/`, CONFIG)
-        // console.log(`${END_POINT}?page=${page}&page_size=${page_size}`)
-        setQuestion(response.data)
+        // setQuestion(response.data)
         return response.data
     }
 
@@ -140,10 +209,32 @@ const HomePage = () => {
         });
     }
 
+    const deleteChoice= (id, choice_id, choice_text) =>{
+        const MySwal = withReactContent(Swal);
+        MySwal.fire({
+            title: `¿Seguro de eliminar la opción ${choice_text}?`,
+            text: "No se podrá dar marcha atrás",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, eliminar',
+            cancelButtonText:'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setId(id);
+                makeRequestChoices('DELETE',{id: id, choice_id:choice_id});
+            } else {
+                Swal.fire('La opción no fue eliminada', '', 'info')
+            }
+        });
+    }
+
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalVoteOpen, setIsModalVoteOpen] = useState(false);
     const [isModalChoiceOpen, setIsModalChoiceOpen] = useState(false);
 
-    const showModal = (user_action,id, question_text, pub_date) => {
+    const showModal = (user_action,question) => {
         setIsModalOpen(true);
 
         setId('');
@@ -155,16 +246,18 @@ const HomePage = () => {
         }
         else if(user_action === EDIT){
             setModalTitle('Editar Pregunta');
-            setId(id);
-            setQuestionText(question_text);
-            setPubDate(pub_date);
+            console.log(question);
+            setId(question.pk);
+            setQuestionText(question.question_text);
+            setPubDate(question.pub_date);
+            setQuestion(question);
         }
     };
 
-    const showModalChoices =  async(question_id) => {
-        setIsModalChoiceOpen(true);
+    const showModalVote =  async(question_id) => {
+        setIsModalVoteOpen(true);
         console.log('Antes de getQuestion');
-        setQuestion(await getQuestion(question_id));
+        console.log(setQuestion(await getQuestion(question_id)));
         console.log('Despues de getQuestion');
     };
 
@@ -176,22 +269,41 @@ const HomePage = () => {
         setIsModalOpen(false);
     };
 
-    const handleChoiceOk = () => {
-        setIsModalChoiceOpen(false);
+    const handleVoteOk = () => {
+        setIsModalVoteOpen(false);
     };
 
-    const handleChoiceCancel = () => {
-        setIsModalChoiceOpen(false);
+    const handleVoteCancel = () => {
+        setIsModalVoteOpen(false);
     };
 
-    const setCustomPubDate = (pub_date) => {
-        console.log(pub_date);
-        if (pub_date == null) {
-            setPubDate(dayjs());
-        } else {
-            setPubDate(pub_date);
+    const showModalChoice = (user_action,choice) => {
+        setIsModalChoiceOpen(true);
+
+        console.log('showModalChoice choice: ',choice)
+
+        setOperation(user_action);
+        if(user_action === CREATE){
+            setId('');
+            setChoiceId('');
+            setChoiceText('');
+            setSubModalTitle('Registrar Opción');
         }
-    }
+        else if(user_action === EDIT){
+            setSubModalTitle('Editar Opción');
+            setId(choice.question_id);
+            setChoiceId(choice.pk);
+            setChoiceText(choice.choice_text);
+        }
+      };
+    
+      const handleChoiceOk = (question) => {
+        validarChoice(question);
+      };
+    
+      const handleChoiceCancel = () => {
+        setIsModalChoiceOpen(false);
+      };
 
     const dataSource = [
         questions.map( (question,i)=>(
@@ -200,6 +312,7 @@ const HomePage = () => {
                 pk: question.id,
                 question_text: question.question_text,
                 pub_date: question.pub_date,
+                choices: question.choices,
             }
         ))
     ];
@@ -226,7 +339,7 @@ const HomePage = () => {
             key: 'acciones',
             render: (_, record) => (
                 <Space size="middle">
-                    <Button type="primary" onClick={()=>showModal(EDIT, record.pk, record.question_text, record.pub_date)}>
+                    <Button type="primary" onClick={()=>showModal(EDIT, record)}>
                         Editar
                     </Button>
                     &nbsp;
@@ -234,13 +347,59 @@ const HomePage = () => {
                         Borrar
                     </Button>
                     &nbsp;
-                    <Button type="primary" onClick={()=>showModalChoices(record.pk, record.choice_text)}>
+                    <Button type="primary" onClick={()=>showModalVote(record.pk)}>
                         Votar    
                     </Button>
                 </Space>
               ),
           },
     ];
+
+    const choiceDataSource = [
+        question && question.choices && question.choices.map( (choice, i)=>(
+            {
+                key: i + 1,
+                pk: choice.id,
+                choice_text: choice.choice_text,
+                votes: choice.votes,
+                question_id: question.pk,
+            }
+        ))
+      ];
+      
+    const choiceColumns = [
+        {
+          title: 'ID',
+          dataIndex: 'pk',
+          key: 'pk',
+        },
+        {
+          title: 'Opción',
+          dataIndex: 'choice_text',
+          key: 'choice_text',
+        },
+        {
+          title: 'Votes',
+          dataIndex: 'votes',
+          key: 'votes',
+        },
+        {
+            title: 'Acciones',
+            dataIndex: 'acciones',
+            key: 'acciones',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button type="primary" onClick={()=>showModalChoice(EDIT, record)}>
+                        Editar
+                    </Button>
+                    &nbsp;                
+                    <Button type="primary" onClick={()=>deleteChoice(record.question_id,record.pk, record.choice_text)}>
+                        Borrar
+                    </Button>
+                </Space>
+              ),
+          },
+      ];
 
     return (
         <div className='App'>
@@ -274,15 +433,7 @@ const HomePage = () => {
                 title={modal_title}
                 open={isModalOpen}
                 onOk={handleOk}
-                onCancel={handleCancel}
-                footer={[
-                    <Button key="back" onClick={handleCancel}>
-                        Cancelar
-                    </Button>,
-                    <Button key="submit" type="primary" onClick={handleOk}>
-                        Guardar
-                    </Button>,
-                  ]}>
+                onCancel={handleCancel} >
                 <Input
                     placeholder="Escriba una pregunta"
                     value={ question_text }
@@ -291,17 +442,40 @@ const HomePage = () => {
                     showTime
                     value={ dayjs(pub_date) }
                     onChange={date => setCustomPubDate(date)} />
+                {/* { console.log(id) } */}
+                <Button key="back" onClick={handleCancel}>
+                    Cancelar
+                </Button>
+                <Button key="submit" type="primary" onClick={handleOk}>
+                    Guardar
+                </Button>
+                { console.log('Question en tabla: ',question) }
+                { console.log('Choice dataSource: ',choiceDataSource[0]) }
+                {   (question.pk || question.id) ? 
+                    <>
+                    <Table 
+                        dataSource={choiceDataSource[0]} 
+                        columns={choiceColumns}
+                        pagination={false} />
+                        <Button type="primary" onClick={() =>showModalChoice(CREATE,  question)}>
+                            Añadir Opción
+                        </Button>
+                        </>
+                    :
+                    null
+                }
+                
             </Modal>
             <Modal
                 title='Opciones'
-                open={isModalChoiceOpen}
-                onOk={handleChoiceOk}
-                onCancel={handleChoiceCancel}
+                open={isModalVoteOpen}
+                onOk={handleVoteOk}
+                onCancel={handleVoteCancel}
                 footer={[
-                    <Button key="back" onClick={handleChoiceCancel}>
+                    <Button key="back" onClick={handleVoteCancel}>
                         Cancelar
                     </Button>,
-                    <Button key="submit" type="primary" onClick={handleChoiceOk}>
+                    <Button key="submit" type="primary" onClick={handleVoteOk}>
                         Votar
                     </Button>,
                 ]}>
@@ -310,6 +484,16 @@ const HomePage = () => {
                             <p>{ choice.id } - { choice.choice_text }</p>
                         ))
                     }
+            </Modal>
+            <Modal 
+                title={sub_modal_title}
+                open={isModalChoiceOpen}
+                onOk={() => handleChoiceOk(question)}
+                onCancel={handleChoiceCancel}>
+                <Input
+                    placeholder="Escriba una opción"
+                    value={ choice_text }
+                    onChange={(e)=> setChoiceText(e.target.value)} />
             </Modal>
         </div>
     )

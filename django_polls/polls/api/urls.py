@@ -21,7 +21,7 @@ urlpatterns = [
         name='choice_list'
     ),
     path(
-        route='questions/<int:pk>/choices/<int:choice_id>/',
+        route='questions/<int:pk>/choices/<int:id>/',
         view=views.ChoiceRetrieveUpdateDestroyView.as_view(),
         name='choice_detail'
     ),
